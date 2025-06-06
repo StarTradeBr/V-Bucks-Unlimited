@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fortnite V-Bucks Generator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Orbitron', sans-serif;
+      background: url('font.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      overflow-x: hidden;
+    }
+    .overlay {
+      background: rgba(0,0,0,0.75);
+      height: 100%;
+      width: 100%;
+      position: fixed;
+      top: 0; left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 5px;
+      color: #0082fc;
+      text-shadow: 0 0 10px #0099ff;
+    }
+    h2 {
+      font-weight: 400;
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      color: #aaa;
+    }
+    form {
+      background: rgba(25, 25, 25, 0.85);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #008cff;
+      width: 320px;
+      text-align: center;
+    }
+    input, select {
+      width: 90%;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 1em;
+      outline: none;
+    }
+    select {
+      background: #fff;
+      color: #000;
+    }
+    button {
+      background: #00b7ff;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+    button:hover {
+      background: #4583a0;
+    }
+    .hidden { display: none; }
+    .loader-bar {
+      width: 100%;
+      height: 22px;
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 20px;
+      box-shadow: 0 0 8px #00a0fd;
+    }
+    .loader-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00ffff, #007f5f);
+      animation-fill-mode: forwards;
+    }
+    .loading-text {
+      margin-top: 10px;
+      font-family: monospace;
+      font-size: 0.9em;
+      color: #9df2c5;
+      min-height: 24px;
+    }
+    .discord-button {
+      margin-top: 30px;
+      background: #7289da;
+      box-shadow: 0 0 10px #7289da;
+    }
+    .final-message {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #0099ff;
+      text-shadow: 0 0 8px #0099ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <h1>Fortnite V-Bucks Generator</h1>
+
+    <form id="form-generator">
+      <input type="text" id="username" placeholder="Entrez votre pseudo" required />
+      <select id="platform" required>
+        <option value="">Choisissez votre plateforme</option>
+        <option value="PC">PC</option>
+        <option value="PlayStation">PlayStation</option>
+        <option value="Xbox">Xbox</option>
+        <option value="Nintendo Switch">Nintendo Switch</option>
+        <option value="Mobile">Mobile</option>
+      </select>
+      <input type="number" id="amount" placeholder="Nombre de V-Bucks (max 10000)" min="1" max="10000" required />
+      <button type="submit">Générer</button>
+    </form>
+
+    <div id="loading-section" class="hidden" style="width:320px; text-align:center;">
+      <div class="loader-bar">
+        <div class="loader-progress" id="loader-progress"></div>
+      </div>
+      <div class="loading-text" id="loading-text">Initialisation...</div>
+    </div>
+
+    <button id="discord-btn" class="discord-button hidden" disabled>Rejoindre le Discord</button>
+    <div id="final-message" class="final-message hidden"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form-generator');
+    const loadingSection = document.getElementById('loading-section');
+    const loaderProgress = document.getElementById('loader-progress');
+    const loadingText = document.getElementById('loading-text');
+    const discordBtn = document.getElementById('discord-btn');
+    const finalMessage = document.getElementById('final-message');
+
+    let username = '', platform = '', amount = 0;
+    const discordLink = "https://discord.gg/cp4buz3Bzy";
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      username = document.getElementById('username').value.trim();
+      platform = document.getElementById('platform').value;
+      amount = parseInt(document.getElementById('amount').value);
+
+      if (username.length < 2) {
+        alert("Pseudo trop court !");
+        return;
+      }
+      if (!platform) {
+        alert("Veuillez choisir une plateforme !");
+        return;
+      }
+      if (isNaN(amount) || amount < 1 || amount > 10000) {
+        alert("Entrez un nombre valide de V-Bucks (1 à 10000).");
+        return;
+      }
+
+      form.classList.add('hidden');
+      loadingSection.classList.remove('hidden');
+      startLoading();
+    });
+
+    function startLoading() {
+      const totalDuration = (7 + Math.random() * 6) * 1000;
+      let start = null;
+      let fakeSteps = [
+        "Connexion aux serveurs Epic Games...",
+        "Vérification du compte...",
+        "Préparation du transfert des V-Bucks...",
+        "Traitement de la transaction...",
+        "Finalisation...",
+        "Envoi des données...",
+        "Connexion sécurisée établie...",
+        "Transmission en cours...",
+        "Validation finale..."
+      ];
+      let currentStep = 0;
+
+      function step(timestamp) {
+        if (!start) start = timestamp;
+        let progress = (timestamp - start) / totalDuration;
+        if (progress > 1) progress = 1;
+
+        loaderProgress.style.width = (progress * 100) + "%";
+
+        if (progress > currentStep / fakeSteps.length && currentStep < fakeSteps.length) {
+          loadingText.textContent = fakeSteps[currentStep];
+          currentStep++;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          loadingSection.classList.add('hidden');
+          showDiscordButton();
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function showDiscordButton(){
+      discordBtn.classList.remove('hidden');
+      discordBtn.disabled = false;
+      discordBtn.textContent = "Rejoindre le Discord (5s)";
+      let countdown = 5;
+      discordBtn.disabled = true;
+
+      const interval = setInterval(() => {
+        countdown--;
+        discordBtn.textContent = `Rejoindre le Discord (${countdown}s)`;
+        if (countdown <= 0) {
+          clearInterval(interval);
+          discordBtn.textContent = "Rejoindre le Discord";
+          discordBtn.disabled = false;
+        }
+      }, 1000);
+    }
+
+    discordBtn.addEventListener('click', () => {
+      window.open(discordLink, '_blank');
+      finalMessage.classList.remove('hidden');
+      finalMessage.textContent = `Bravo ${username} ! ${amount} V-Bucks ont été générés sur ${platform} ! 🎉 Vous les recevrez dans les 24h.`;
+    });
+  </script>
+</body>
+</html>
