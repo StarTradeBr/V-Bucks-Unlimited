@@ -45,6 +45,7 @@
       box-shadow: 0 0 20px #008cff;
       width: 320px;
       text-align: center;
+      transition: opacity 0.5s ease;
     }
     input, select {
       width: 90%;
@@ -54,6 +55,10 @@
       border: none;
       font-size: 1em;
       outline: none;
+      transition: box-shadow 0.3s ease;
+    }
+    input:focus, select:focus {
+      box-shadow: 0 0 10px #00b7ff;
     }
     select {
       background: #fff;
@@ -68,13 +73,18 @@
       font-weight: 700;
       font-size: 1.1em;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.2s ease;
       width: 100%;
     }
-    button:hover {
+    button:hover:not(:disabled) {
       background: #4583a0;
+      transform: scale(1.05);
     }
-    .hidden { display: none; }
+    .hidden {
+      display: none !important;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
     .loader-bar {
       width: 100%;
       height: 22px;
@@ -83,12 +93,14 @@
       overflow: hidden;
       margin-top: 20px;
       box-shadow: 0 0 8px #00a0fd;
+      transition: box-shadow 0.3s ease;
     }
     .loader-progress {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #00ffff, #007f5f);
       animation-fill-mode: forwards;
+      transition: width 0.3s ease;
     }
     .loading-text {
       margin-top: 10px;
@@ -96,11 +108,26 @@
       font-size: 0.9em;
       color: #9df2c5;
       min-height: 24px;
+      transition: color 0.3s ease;
     }
     .discord-button {
       margin-top: 30px;
       background: #7289da;
       box-shadow: 0 0 10px #7289da;
+      padding: 14px 24px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1em;
+      cursor: pointer;
+      width: 320px;
+      border: none;
+      transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.5s ease;
+      opacity: 0;
+    }
+    .discord-button:hover:not(:disabled) {
+      background: #5a6fbf;
+      transform: scale(1.05);
     }
     .final-message {
       margin-top: 20px;
@@ -108,6 +135,10 @@
       font-weight: 700;
       color: #0099ff;
       text-shadow: 0 0 8px #0099ff;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      max-width: 320px;
+      text-align: center;
     }
   </style>
 </head>
@@ -151,6 +182,15 @@
     let username = '', platform = '', amount = 0;
     const discordLink = "https://discord.gg/cp4buz3Bzy";
 
+    // Assure que le bouton Discord est caché et transparent au départ
+    discordBtn.classList.add('hidden');
+    discordBtn.style.opacity = "0";
+    discordBtn.disabled = true;
+
+    // Pareil pour le message final
+    finalMessage.classList.add('hidden');
+    finalMessage.style.opacity = "0";
+
     form.addEventListener('submit', e => {
       e.preventDefault();
       username = document.getElementById('username').value.trim();
@@ -170,9 +210,14 @@
         return;
       }
 
-      form.classList.add('hidden');
-      loadingSection.classList.remove('hidden');
-      startLoading();
+      // Cache le formulaire avec un fondu
+      form.style.opacity = "0";
+      setTimeout(() => {
+        form.classList.add('hidden');
+        loadingSection.classList.remove('hidden');
+        loadingSection.style.opacity = "1";
+        startLoading();
+      }, 500);
     });
 
     function startLoading() {
@@ -206,8 +251,12 @@
         if (progress < 1) {
           requestAnimationFrame(step);
         } else {
-          loadingSection.classList.add('hidden');
-          showDiscordButton();
+          // Cache la section de chargement avec fondu
+          loadingSection.style.opacity = "0";
+          setTimeout(() => {
+            loadingSection.classList.add('hidden');
+            showDiscordButton();
+          }, 500);
         }
       }
       requestAnimationFrame(step);
@@ -215,7 +264,10 @@
 
     function showDiscordButton(){
       discordBtn.classList.remove('hidden');
-      discordBtn.disabled = false;
+      setTimeout(() => {
+        discordBtn.style.opacity = "1";
+        discordBtn.disabled = false;
+      }, 50);
       discordBtn.textContent = "Rejoindre le Discord (5s)";
       let countdown = 5;
       discordBtn.disabled = true;
@@ -227,15 +279,22 @@
           clearInterval(interval);
           discordBtn.textContent = "Rejoindre le Discord";
           discordBtn.disabled = false;
+          showFinalMessage();
         }
       }, 1000);
     }
 
     discordBtn.addEventListener('click', () => {
       window.open(discordLink, '_blank');
-      finalMessage.classList.remove('hidden');
-      finalMessage.textContent = `Bravo ${username} ! ${amount} V-Bucks ont été générés sur ${platform} ! 🎉 Vous les recevrez dans les 24h.`;
     });
+
+    function showFinalMessage() {
+      finalMessage.textContent = `${amount} V-Bucks ont été ajoutés à ${username} sur ${platform} !`;
+      finalMessage.classList.remove('hidden');
+      setTimeout(() => {
+        finalMessage.style.opacity = "1";
+      }, 50);
+    }
   </script>
 </body>
 </html>
